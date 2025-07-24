@@ -159,11 +159,11 @@ namespace platformingPrototype
             // 
             if (CollisionState[1] == "right")
             {
-                Location.X = xStickTarget.Left - this.Width-1;
+                Location.X = xStickTarget.Left - this.Width;
             }
             else if (CollisionState[1] == "left")
             {
-                Location.X = xStickTarget.Right + 1;
+                Location.X = xStickTarget.Right ;
             }
 
 
