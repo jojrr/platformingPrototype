@@ -72,20 +72,22 @@ namespace platformingPrototype
         /// <summary>
         /// Checks if the target's hitbox is colliding with this entity's hitbox. 
         /// Returned position is relative to this Entity.
+        /// CollisionState[0] and [1] is the assigned Y and X collision value respectively.
         /// </summary>
         /// <param name="collisionTarget"></param>
-        /// <returns>string: "bottom", "top", "side", or (default)"null"</returns>
+        /// <returns>Rectangle: the collisionTarget's hitbox</returns>
         private Rectangle IsCollidingWith(Entity collisionTarget)
         {
             Rectangle targetHitbox = collisionTarget.getHitbox();
             Point targetCenter = collisionTarget.getCenter();
-
+            
+            // sets collision to null if not longer colliding with the previously colliding hitbox
             if (!Hitbox.IntersectsWith(targetHitbox))
             {
                 if (targetHitbox == xStickTarget)
                 {
                     xStickTarget = Hitbox;
-                    CollisionState[1] = "null";
+                    CollisionState[1] = "null"; 
                 }
                 if (targetHitbox == yStickTarget)
                 {
@@ -95,14 +97,17 @@ namespace platformingPrototype
             }
             else
             {
+                // if this' center is between the left and the right of the hitbox 
                 if ((Center.X < targetHitbox.Right) && (Center.X > targetHitbox.Left))
                 {
+                    // Checks if there is a platform below - considers overshoot
                     if ( (Center.Y <= targetHitbox.Top  ) || (OverShootRec.IntersectsWith(targetHitbox) && (OverShootRec.Top < targetHitbox.Top)))
                     {
-                        if (!IsOnFloor) { yVelocity = 0; }
+                        if (!IsOnFloor) { yVelocity = 0; } // zeros the velocity if the player was previously not on the floor when landing (prevents fling)
                         CollisionState[0] = "bottom";
                         yStickTarget = targetHitbox;
                     }
+                    // Checks if there is a platform above the player
                     else if (Center.Y >= targetCenter.Y + targetHitbox.Height/2 - Height/4 )
                     {
                         CollisionState[0] = "top";
@@ -110,7 +115,7 @@ namespace platformingPrototype
                     }
                 }
 
-
+                // Checks if there is a platform to the left/right of the player
                 if (Center.X < targetHitbox.Left)
                 {
                     CollisionState[1] = "right";
@@ -122,33 +127,39 @@ namespace platformingPrototype
                     xStickTarget = targetHitbox;
                 }
             }
+            
         return targetHitbox;
-
+        
         }
 
         public void CheckPlatformCollision(Entity target)
         {
             Rectangle targetHitbox =  IsCollidingWith(target);
 
+            // if platform is above -> set the location to 1 under the platform to prevent getting stuck
             if ( CollisionState[0] == "top")
             {
                 Location.Y = yStickTarget.Bottom + 1; 
                 yVelocity = 0;
             }
+
+            // adds coyote time if there is a platform below the player, and sets the Y value of the player to the platform
             else if ( CollisionState[0] == "bottom" )
             {
                 CoyoteTime = 10;
                 Location.Y = yStickTarget.Y - Height;
             }
 
+            // if the player is colliding with a corner, prevents the left/right wall collisions
             if (xStickTarget == yStickTarget)
             {
                 return;
             }
 
+            // 
             if (CollisionState[1] == "right")
             {
-                Location.X = xStickTarget.Left - this.Width+1;
+                Location.X = xStickTarget.Left - this.Width-1;
             }
             else if (CollisionState[1] == "left")
             {
