@@ -9,28 +9,33 @@ namespace platformingPrototype
 {
     internal class Character : Entity
     {
+        // list of all characters - [int: level][list: chunk][Character]
+        // used for gametick
         public static List<Character>[][] CharacterList = new List<Character>[TotalLevels][];
+        
         public double xVelocity;
         public double yVelocity;
         public bool IsMoving = false;
         public bool IsOnFloor = false;
-        public bool HasGravity = true;
-        public bool WallInfront = false;
+        public bool HasGravity
         
         private const int TerminalVelocity = 100;
         private const int MaxXVelocity = 10;
         private int CoyoteTime;
         private const double Gravity = 0.981;
+
         public Rectangle xStickTarget;
         public Rectangle yStickTarget;
 
         private Rectangle OverShootRec;
+        
         /// <summary>
-        /// Array that stores the current collision detection of the
+        /// Array that stores the current collision state of this character.
+        /// format [Y, X]
         /// </summary>
         public string[] CollisionState = { "null", "null" };
 
-        // Initalises the jagged array - storing the enemies of each chunk per level.
+        // Initalises the jagged array - adds this character to [level][chunk]
         static Character()
         {
             // Loops through all levels and looks at the number of chunks of each level stored in the array
@@ -146,7 +151,7 @@ namespace platformingPrototype
             // adds coyote time if there is a platform below the player, and sets the Y value of the player to the platform
             else if ( CollisionState[0] == "bottom" )
             {
-                CoyoteTime = 10;
+                CoyoteTime = 10; // 100ms (on 10ms timer)
                 Location.Y = yStickTarget.Y - Height;
             }
 
@@ -159,11 +164,11 @@ namespace platformingPrototype
             // 
             if (CollisionState[1] == "right")
             {
-                Location.X = xStickTarget.Left - this.Width-1;
+                Location.X = xStickTarget.Left - this.Width;
             }
             else if (CollisionState[1] == "left")
             {
-                Location.X = xStickTarget.Right + 1;
+                Location.X = xStickTarget.Right;
             }
 
 
@@ -177,31 +182,40 @@ namespace platformingPrototype
         {
             if (HasGravity)
             {
+                // if there is no floor beneath -> gravity occurs
                 if ( CollisionState[0] != "bottom" )
                 {
                     IsOnFloor = false;
                     yVelocity += Gravity; 
 
+                    // Terminal velocity -> only applies downwards
                     if (yVelocity > 0) { yVelocity = Math.Min(yVelocity, TerminalVelocity); }
                 }
+                // Coyote time ticks down 
                 if (CoyoteTime > 0) 
                 {
                     CoyoteTime -= 1;
-                    IsOnFloor = true; 
+                    IsOnFloor = true; // allows for more responsive jumping
                 }
             }
 
             xVelocity = Math.Min(Math.Abs(xVelocity), MaxXVelocity) * Math.Sign(xVelocity); // stops the player from achieving lightspeed
 
             updateLocation(Location.X + (int)xVelocity, Location.Y + (int)yVelocity);
-            SetOverShootRec();
+            SetOverShootRec(); 
 
+            // if not moving horizontally -> gradually decrease horizontal velocity
             if ((!IsMoving) && (Math.Abs(xVelocity) > 0.01)) 
             {
                 xVelocity *= 0.85;
             }
         }
 
+        /// <summary>
+        /// creates a new rectangle to detect for overshoot above the player's current location.
+        /// Rectangle is the size of the player (effectively doubling the player's height)
+        /// Only used to detect overshoot incase the player clips into the ground.
+        /// </summary>
         private void SetOverShootRec()
         {
             OverShootRec = new Rectangle(Location.X, Location.Y - Height, Width, Height);
