@@ -25,24 +25,24 @@ namespace platformingPrototype
             width: 400,
             height: 175,
             LocatedLevel: 0,
-            LocatedChunk: 0);
+            LocatedChunk: 1);
 
         readonly Platform box4 = new(
             origin: new Point(1000, 400),
             width: 200,
             height: 300,
             LocatedLevel: 0,
-            LocatedChunk: 0);
+            LocatedChunk: 1);
 
         bool movingLeft = false;
         bool movingRight = false;
         bool jumping = false;
 
-        int jumpVelocity = -12;
-        double xAccel = 0.5;
+        int jumpVelocity = -22;
+        double xAccel = 2;
 
         int CurrentLevel;
-        int LoadedChunks;
+        List<int> LoadedChunks;
 
         public Form1()
         {
@@ -53,7 +53,7 @@ namespace platformingPrototype
         private void Form1_Load(object sender, EventArgs e)
         {
             CurrentLevel = 0;
-            LoadedChunks = 1;
+            LoadedChunks = [0];
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -73,19 +73,27 @@ namespace platformingPrototype
                 playerBox.IsMoving = true;
             }
 
-            for (int chunk = 0; chunk < LoadedChunks; chunk++)
+            foreach (int chunk1 in LoadedChunks)
             {
-                foreach (Character chara in Character.CharacterList[CurrentLevel][chunk])
+                foreach (Character chara in Character.CharacterList[CurrentLevel][chunk1])
                 {
-                    foreach (Platform plat in Platform.PlatformList[CurrentLevel][chunk])
+                    foreach (int chunk2 in LoadedChunks)
                     {
-                        chara.MoveCharacter();
-                        chara.CheckPlatformCollision(plat); 
+                        foreach (Platform plat in Platform.PlatformList[CurrentLevel][chunk2])
+                        {
+                            chara.CheckPlatformCollision(plat);
+                        }
                     }
+                    chara.MoveCharacter();
                 }
             }
 
-            label5.Text = (playerBox.CollisionState[0]).ToString();
+            if (playerBox.getCenter().X > 500){
+                if (!LoadedChunks.Contains(1)) { LoadedChunks.Add(1); };
+            }
+            else { LoadedChunks.Remove(1); }
+
+                label5.Text = (playerBox.CollisionState[0]).ToString();
             label4.Text = (playerBox.CollisionState[1]).ToString();
             label1.Text = (playerBox.getCenter()).ToString();
             label2.Text = (box2.getCenter()).ToString();
@@ -98,7 +106,7 @@ namespace platformingPrototype
         {
             Pen bluePen = new Pen(Color.Blue, 3);
             Pen redPen = new Pen(Color.Red, 3);
-            for (int chunk = 0; chunk < LoadedChunks; chunk++)
+            foreach (int chunk in LoadedChunks)
             {
                 foreach (Character chara in Character.CharacterList[CurrentLevel][chunk])
                 {
