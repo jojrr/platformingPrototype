@@ -18,8 +18,15 @@ namespace platformingPrototype
         public bool WallInfront = false;
         
         private const int TerminalVelocity = 10;
-        public Rectangle stickTarget;
-        public string PlatformCollision = "null";
+        private const double Gravity = 0.2;
+        public Rectangle xStickTarget;
+        public Rectangle yStickTarget;
+
+        private Rectangle OverShootRec;
+        /// <summary>
+        /// Array that stores the current collision detection of the
+        /// </summary>
+        public string[] CollisionState = { "null", "null" };
 
         // Initalises the jagged array - storing the enemies of each chunk per level.
         static Character()
@@ -54,42 +61,109 @@ namespace platformingPrototype
             this.xVelocity = xVelocity;
             this.yVelocity = yVelocity;
             HasGravity = !flying;
+            SetOverShootRec();
             CharacterList[LocatedLevel][LocatedChunk].Add(this);
-            stickTarget = Hitbox;
+        }
+
+
+
+        /// <summary>
+        /// Checks if the target's hitbox is colliding with this entity's hitbox. 
+        /// Returned position is relative to this Entity.
+        /// </summary>
+        /// <param name="collisionTarget"></param>
+        /// <returns>string: "bottom", "top", "side", or (default)"null"</returns>
+        private Rectangle IsCollidingWith(Entity collisionTarget)
+        {
+            Rectangle targetHitbox = collisionTarget.getHitbox();
+            Point targetCenter = collisionTarget.getCenter();
+
+            if (!Hitbox.IntersectsWith(targetHitbox))
+            {
+                if (targetHitbox == xStickTarget)
+                {
+                    xStickTarget = Hitbox;
+                    CollisionState[1] = "null";
+                }
+                if (targetHitbox == yStickTarget)
+                {
+                    yStickTarget = Hitbox;
+                    CollisionState[0] = "null";
+                }
+            }
+            else
+            {
+                if ((Center.X < targetHitbox.Right) && (Center.X > targetHitbox.Left))
+                {
+                    if ( (Center.Y <= targetHitbox.Top  ) || (OverShootRec.IntersectsWith(targetHitbox) && (OverShootRec.Top < targetHitbox.Top)))
+                    {
+                        if (!IsOnFloor) { yVelocity = 0; }
+                        CollisionState[0] = "bottom";
+                        yStickTarget = targetHitbox;
+                    }
+                    else if (Center.Y >= targetCenter.Y + targetHitbox.Height/2 - Height/4 )
+                    {
+                        CollisionState[0] = "top";
+                        yStickTarget = targetHitbox;
+                    }
+                }
+
+
+                if (Center.X < targetHitbox.Left)
+                {
+                    CollisionState[1] = "right";
+                    xStickTarget = targetHitbox;
+                }
+                else if (Center.X > targetHitbox.Right)
+                {
+                    CollisionState[1] = "left";
+                    xStickTarget = targetHitbox;
+                }
+            }
+        return targetHitbox;
+
         }
 
         public void CheckPlatformCollision(Entity target)
         {
-            PlatformCollision = IsCollidingWith(target);
-            Rectangle targetHitbox = target.getHitbox();
+            Rectangle targetHitbox =  IsCollidingWith(target);
             if (HasGravity)
             {
-                if ( (PlatformCollision!="bottom") && (yVelocity != 0) )
+                if ( CollisionState[0] != "bottom" )
                 {
                     IsOnFloor = false;
+                    yVelocity += Gravity; 
 
-                    if (PlatformCollision == "top")
-                    {
-                        yVelocity = 3;
-                    }
-                    yVelocity += 0.3;
                     if (yVelocity > 0) { yVelocity = Math.Min(yVelocity, TerminalVelocity); }
                 }
-                else 
-                {
-                    stickTarget = targetHitbox;
-                    yVelocity = 0;
-                    IsOnFloor = true;
-                    this.updateLocation(Location.X, stickTarget.Y - this.Height);
-                }
+                if (Hitbox.IntersectsWith(yStickTarget)) { IsOnFloor = true; }
             }
 
-            if (PlatformCollision == "side")
+            if ( CollisionState[0] == "top")
             {
-                xVelocity = -xVelocity;
-                WallInfront = true;
+                Location.Y = yStickTarget.Bottom + 1; 
+                yVelocity = 0;
             }
-            if (IsOnFloor) { WallInfront = false; }
+            else if ( CollisionState[0] == "bottom" )
+            {
+                Location.Y = yStickTarget.Y - Height;
+            }
+
+            if (xStickTarget == yStickTarget)
+            {
+                return;
+            }
+
+            if (CollisionState[1] == "right")
+            {
+                Location.X = xStickTarget.Left - this.Width+1;
+            }
+            else if (CollisionState[1] == "left")
+            {
+                Location.X = xStickTarget.Right + 1;
+            }
+
+
         }
 
         /// <summary>
@@ -99,11 +173,19 @@ namespace platformingPrototype
         public void MoveCharacter()
         {
             xVelocity = Math.Min(Math.Abs(xVelocity), 5) * Math.Sign(xVelocity); // stops the player from achieving lightspeed
+
             updateLocation(Location.X + (int)xVelocity, Location.Y + (int)yVelocity);
+            SetOverShootRec();
+
             if ((!IsMoving) && (Math.Abs(xVelocity) > 0.01)) 
             {
-                xVelocity = xVelocity / 1.28;
+                xVelocity = xVelocity / 1.05;
             }
+        }
+
+        private void SetOverShootRec()
+        {
+            OverShootRec = new Rectangle(Location.X, Location.Y - Height, Width, Height);
         }
 
     }

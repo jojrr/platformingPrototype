@@ -25,33 +25,6 @@ namespace platformingPrototype
         protected static readonly int[] ChunksInLvl = new int[TotalLevels] { 2 };
 
         /// <summary>
-        /// Checks if the target's hitbox is colliding with this entity's hitbox. 
-        /// Returned position is relative to this Entity.
-        /// </summary>
-        /// <param name="collisionTarget"></param>
-        /// <returns>string: "bottom", "top", "side", or (default)"null"</returns>
-        public string IsCollidingWith(Entity collisionTarget)
-        {
-            Rectangle targetHitbox = collisionTarget.getHitbox();
-            Point targetCenter = collisionTarget.getCenter();
-
-            if (Hitbox.IntersectsWith(targetHitbox))
-            {
-                if (Center.Y <= targetCenter.Y - targetHitbox.Height/2)
-                {
-                    return "bottom";
-                }
-                else if (Center.Y >= targetCenter.Y + targetHitbox.Height/2 - Height/4 )
-                {
-                    return "top";
-                }
-
-                else return "side";
-            }
-            else return "null";
-        }
-
-        /// <summary>
         /// returns the hitbox as a rectangle
         /// </summary>
         /// <returns>hitbox of type rectangle</returns>
