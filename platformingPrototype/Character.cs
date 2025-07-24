@@ -17,8 +17,10 @@ namespace platformingPrototype
         public bool HasGravity = true;
         public bool WallInfront = false;
         
-        private const int TerminalVelocity = 10;
-        private const double Gravity = 0.2;
+        private const int TerminalVelocity = 100;
+        private const int MaxXVelocity = 10;
+        private int CoyoteTime;
+        private const double Gravity = 0.981;
         public Rectangle xStickTarget;
         public Rectangle yStickTarget;
 
@@ -127,17 +129,6 @@ namespace platformingPrototype
         public void CheckPlatformCollision(Entity target)
         {
             Rectangle targetHitbox =  IsCollidingWith(target);
-            if (HasGravity)
-            {
-                if ( CollisionState[0] != "bottom" )
-                {
-                    IsOnFloor = false;
-                    yVelocity += Gravity; 
-
-                    if (yVelocity > 0) { yVelocity = Math.Min(yVelocity, TerminalVelocity); }
-                }
-                if (Hitbox.IntersectsWith(yStickTarget)) { IsOnFloor = true; }
-            }
 
             if ( CollisionState[0] == "top")
             {
@@ -146,6 +137,7 @@ namespace platformingPrototype
             }
             else if ( CollisionState[0] == "bottom" )
             {
+                CoyoteTime = 10;
                 Location.Y = yStickTarget.Y - Height;
             }
 
@@ -172,14 +164,30 @@ namespace platformingPrototype
         /// </summary>
         public void MoveCharacter()
         {
-            xVelocity = Math.Min(Math.Abs(xVelocity), 5) * Math.Sign(xVelocity); // stops the player from achieving lightspeed
+            if (HasGravity)
+            {
+                if ( CollisionState[0] != "bottom" )
+                {
+                    IsOnFloor = false;
+                    yVelocity += Gravity; 
+
+                    if (yVelocity > 0) { yVelocity = Math.Min(yVelocity, TerminalVelocity); }
+                }
+                if (CoyoteTime > 0) 
+                {
+                    CoyoteTime -= 1;
+                    IsOnFloor = true; 
+                }
+            }
+
+            xVelocity = Math.Min(Math.Abs(xVelocity), MaxXVelocity) * Math.Sign(xVelocity); // stops the player from achieving lightspeed
 
             updateLocation(Location.X + (int)xVelocity, Location.Y + (int)yVelocity);
             SetOverShootRec();
 
             if ((!IsMoving) && (Math.Abs(xVelocity) > 0.01)) 
             {
-                xVelocity = xVelocity / 1.05;
+                xVelocity *= 0.85;
             }
         }
 
