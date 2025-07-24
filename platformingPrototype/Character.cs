@@ -17,7 +17,7 @@ namespace platformingPrototype
         public double yVelocity;
         public bool IsMoving = false;
         public bool IsOnFloor = false;
-        public bool HasGravity
+        public bool HasGravity;
         
         private const int TerminalVelocity = 100;
         private const int MaxXVelocity = 10;

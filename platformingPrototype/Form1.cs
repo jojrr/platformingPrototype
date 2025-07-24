@@ -59,11 +59,9 @@ namespace platformingPrototype
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (playerBox.IsOnFloor && jumping) { playerBox.yVelocity = jumpVelocity; playerBox.IsOnFloor = false; }
-            if (!playerBox.WallInfront)
-            {
-                if (movingLeft) { playerBox.xVelocity -= xAccel; }
-                if (movingRight) { playerBox.xVelocity += xAccel; }
-            }
+            if (movingLeft) { playerBox.xVelocity -= xAccel; }
+            if (movingRight) { playerBox.xVelocity += xAccel; }
+
             if (!movingLeft  && !movingRight)
             {
                 playerBox.IsMoving = false;
