@@ -1,3 +1,4 @@
+using System.Diagnostics.Metrics;
 using System.Text.Json.Serialization;
 
 namespace platformingPrototype
@@ -5,7 +6,7 @@ namespace platformingPrototype
     public partial class Form1 : Form
     {
         Character playerBox = new(
-            origin: new Point(20, 450),
+            origin: new Point(20, 250),
             width: 50,
             height: 50,
             LocatedLevel: 0,
@@ -13,23 +14,23 @@ namespace platformingPrototype
             yVelocity: -0.2);
 
         readonly Platform box2 = new(
-            origin: new Point(0, 500),
+            origin: new Point(0, 650),
             width: 1400,
-            height: 250,
+            height: 550,
             LocatedLevel: 0,
             LocatedChunk: 0);
 
         readonly Platform box3 = new(
-            origin: new Point(500, 200),
+            origin: new Point(300, 200),
             width: 400,
             height: 175,
             LocatedLevel: 0,
             LocatedChunk: 0);
 
         readonly Platform box4 = new(
-            origin: new Point(1000, 300),
+            origin: new Point(1000, 400),
             width: 200,
-            height: 400,
+            height: 300,
             LocatedLevel: 0,
             LocatedChunk: 0);
 
@@ -37,8 +38,8 @@ namespace platformingPrototype
         bool movingRight = false;
         bool jumping = false;
 
-        int jumpHeight = -12;
-        int xAccel = 3;
+        int jumpVelocity = -12;
+        double xAccel = 0.5;
 
         int CurrentLevel;
         int LoadedChunks;
@@ -55,10 +56,9 @@ namespace platformingPrototype
             LoadedChunks = 1;
         }
 
-        int p = 0;
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (playerBox.IsOnFloor && jumping) { playerBox.yVelocity = jumpHeight; playerBox.IsOnFloor = false; }
+            if (playerBox.IsOnFloor && jumping) { playerBox.yVelocity = jumpVelocity; playerBox.IsOnFloor = false; }
             if (!playerBox.WallInfront)
             {
                 if (movingLeft) { playerBox.xVelocity -= xAccel; }
@@ -79,17 +79,17 @@ namespace platformingPrototype
                 {
                     foreach (Platform plat in Platform.PlatformList[CurrentLevel][chunk])
                     {
-                        p += 1;
                         chara.MoveCharacter();
-                        if (!chara.IsOnFloor) { chara.CheckPlatformCollision(plat); }
+                        chara.CheckPlatformCollision(plat); 
                     }
                 }
             }
 
-            label5.Text = playerBox.PlatformCollision;
+            label5.Text = (playerBox.CollisionState[0]).ToString();
+            label4.Text = (playerBox.CollisionState[1]).ToString();
             label1.Text = (playerBox.getCenter()).ToString();
             label2.Text = (box2.getCenter()).ToString();
-            label3.Text = Convert.ToString(playerBox.stickTarget.Y);
+            label3.Text = Convert.ToString(playerBox.xStickTarget);
             GC.Collect();
             this.Refresh();
         }
