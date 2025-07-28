@@ -106,8 +106,8 @@ namespace platformingPrototype
 
                     if (onWorldBoundary == "null")
                     {
-                        if (scrollRight && movingRight) { ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity); }
-                        else if (scrollLeft && movingLeft) { ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity); }
+                        if (scrollRight && movingRight) { ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity); isScrolling = true; }
+                        else if (scrollLeft && movingLeft) { ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity); isScrolling = true; }
                         else
                             isScrolling = false;
                     }
