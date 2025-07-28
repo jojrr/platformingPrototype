@@ -31,15 +31,17 @@ namespace platformingPrototype
         
         /// <summary>
         /// Array that stores the current collision state of this character.
-        /// format [Y, X]
+        /// format [X, Y]
         /// </summary>
         public string[] CollisionState = { "null", "null" };
+        private int yCollider = 0;
+        private int xCollider = 1;
 
         // Initalises the jagged array - adds this character to [level][chunk]
         static Character()
         {
             // Loops through all levels and looks at the number of chunks of each level stored in the array
-            // [ChunksInLvl] at each according level and initalises the jagged array [CharacterList] accordingly.
+            // [ChunksInLvl] at each according level and initalises the jagged array [CharacterList] accordingly
             for (int level = 0; level < TotalLevels; level++) {
                 int chunks = ChunksInLvl[level];
                 CharacterList[level] = new List<Character>[chunks];
@@ -92,12 +94,12 @@ namespace platformingPrototype
                 if (targetHitbox == xStickTarget)
                 {
                     xStickTarget = Hitbox;
-                    CollisionState[1] = "null"; 
+                    CollisionState[xCollider] = "null"; 
                 }
                 if (targetHitbox == yStickTarget)
                 {
                     yStickTarget = Hitbox;
-                    CollisionState[0] = "null";
+                    CollisionState[yCollider] = "null";
                 }
             }
             else
@@ -109,13 +111,13 @@ namespace platformingPrototype
                     if ( (Center.Y <= targetHitbox.Top  ) || (OverShootRec.IntersectsWith(targetHitbox) && (OverShootRec.Top < targetHitbox.Top)))
                     {
                         if (!IsOnFloor) { yVelocity = 0; } // zeros the velocity if the player was previously not on the floor when landing (prevents fling)
-                        CollisionState[0] = "bottom";
+                        CollisionState[yCollider] = "bottom";
                         yStickTarget = targetHitbox;
                     }
                     // Checks if there is a platform above the player
                     else if (Center.Y >= targetCenter.Y + targetHitbox.Height/2 - Height/4 )
                     {
-                        CollisionState[0] = "top";
+                        CollisionState[yCollider] = "top";
                         yStickTarget = targetHitbox;
                     }
                 }
@@ -123,12 +125,12 @@ namespace platformingPrototype
                 // Checks if there is a platform to the left/right of the player
                 if (Center.X < targetHitbox.Left)
                 {
-                    CollisionState[1] = "right";
+                    CollisionState[xCollider] = "right";
                     xStickTarget = targetHitbox;
                 }
                 else if (Center.X > targetHitbox.Right)
                 {
-                    CollisionState[1] = "left";
+                    CollisionState[xCollider] = "left";
                     xStickTarget = targetHitbox;
                 }
             }
@@ -142,14 +144,14 @@ namespace platformingPrototype
             Rectangle targetHitbox =  IsCollidingWith(target);
 
             // if platform is above -> set the location to 1 under the platform to prevent getting stuck
-            if ( CollisionState[0] == "top")
+            if ( CollisionState[yCollider] == "top")
             {
                 Location.Y = yStickTarget.Bottom + 1; 
                 yVelocity = 0;
             }
 
             // adds coyote time if there is a platform below the player, and sets the Y value of the player to the platform
-            else if ( CollisionState[0] == "bottom" )
+            else if ( CollisionState[yCollider] == "bottom" )
             {
                 CoyoteTime = 10; // 100ms (on 10ms timer)
                 Location.Y = yStickTarget.Y - Height;
@@ -162,11 +164,11 @@ namespace platformingPrototype
             }
 
             // 
-            if (CollisionState[1] == "right")
+            if (CollisionState[xCollider] == "right")
             {
                 Location.X = xStickTarget.Left - this.Width;
             }
-            else if (CollisionState[1] == "left")
+            else if (CollisionState[xCollider] == "left")
             {
                 Location.X = xStickTarget.Right;
             }
@@ -178,7 +180,7 @@ namespace platformingPrototype
         /// Moves the player according to their velocity and checks collision.
         /// also responsible for gravity
         /// </summary>
-        public void MoveCharacter()
+        public void MoveCharacter(bool isScrolling = false)
         {
             if (HasGravity)
             {
@@ -199,9 +201,16 @@ namespace platformingPrototype
                 }
             }
 
+            if (isScrolling == true) 
+            {
+                updateLocation(Location.X, Location.Y + (int)yVelocity);
+            }
+            else
+            {
+                updateLocation(Location.X + (int)xVelocity, Location.Y + (int)yVelocity);
+            }
             xVelocity = Math.Min(Math.Abs(xVelocity), MaxXVelocity) * Math.Sign(xVelocity); // stops the player from achieving lightspeed
 
-            updateLocation(Location.X + (int)xVelocity, Location.Y + (int)yVelocity);
             SetOverShootRec(); 
 
             // if not moving horizontally -> gradually decrease horizontal velocity
@@ -220,6 +229,16 @@ namespace platformingPrototype
         {
             OverShootRec = new Rectangle(Location.X, Location.Y - Height, Width, Height);
         }
+
+
+
+
+
+        public int GetChunksInLevel(int level)
+        {
+            return ChunksInLvl[level];
+        }
+
 
     }
 }

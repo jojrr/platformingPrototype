@@ -6,43 +6,51 @@ namespace platformingPrototype
     public partial class Form1 : Form
     {
         Character playerBox = new(
-            origin: new Point(20, 250),
+            origin: new Point(750, 250),
             width: 50,
             height: 50,
             LocatedLevel: 0,
             LocatedChunk: 0,
             yVelocity: -0.2);
 
-        readonly Platform box2 = new(
-            origin: new Point(0, 650),
-            width: 1400,
+         Platform box2 = new(
+            origin: new Point(1, 650),
+            width: 5400,
             height: 550,
             LocatedLevel: 0,
             LocatedChunk: 0);
 
-        readonly Platform box3 = new(
+         Platform box3 = new(
             origin: new Point(300, 200),
             width: 400,
             height: 175,
             LocatedLevel: 0,
-            LocatedChunk: 1);
+            LocatedChunk: 0);
 
-        readonly Platform box4 = new(
+         Platform box4 = new(
             origin: new Point(1000, 400),
             width: 200,
             height: 300,
             LocatedLevel: 0,
-            LocatedChunk: 1);
+            LocatedChunk: 0);
+
+
+        Rectangle viewPort;
+        string onWorldBoundary = "left";
 
         bool movingLeft = false;
         bool movingRight = false;
         bool jumping = false;
+
+        bool scrollRight = false;
+        bool scrollLeft = false;
 
         int jumpVelocity = -22;
         double xAccel = 2;
 
         int CurrentLevel;
         List<int> LoadedChunks;
+        int AllChunks;
 
         public Form1()
         {
@@ -54,6 +62,10 @@ namespace platformingPrototype
         {
             CurrentLevel = 0;
             LoadedChunks = [0];
+            AllChunks = box2.getChunksInLvl(CurrentLevel); 
+            int windowWidth = this.Width;
+            int windowHeight = this.Height;
+            viewPort = new Rectangle( new Point(-5,0), new Size(windowWidth+10, windowHeight ) );
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -71,6 +83,7 @@ namespace platformingPrototype
                 playerBox.IsMoving = true;
             }
 
+
             foreach (int chunk1 in LoadedChunks)
             {
                 foreach (Character chara in Character.CharacterList[CurrentLevel][chunk1])
@@ -82,23 +95,81 @@ namespace platformingPrototype
                             chara.CheckPlatformCollision(plat);
                         }
                     }
-                    chara.MoveCharacter();
+
+                    if (viewPort.Left < box2.getHitbox().Left) { onWorldBoundary = "left"; } 
+                    else if (viewPort.Right > box2.getHitbox().Right) { onWorldBoundary = "right"; } 
+                    else { onWorldBoundary = "null"; }
+
+                    if (playerBox.getCenter().X < 300) { scrollLeft = true; }
+                    if (playerBox.getCenter().X > 1300) { scrollRight = true; }
+
+                    bool isScrolling = (scrollLeft || scrollRight);
+
+                    if (onWorldBoundary == "null" )
+                    {
+                        if ( isScrolling )
+                            ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
+                    }
+                    else if (onWorldBoundary == "left")
+                    {
+                        if ( scrollRight )
+                            ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
+                        else
+                            isScrolling = false;
+                    }
+
+                    else if (onWorldBoundary == "right")
+                    {
+                        if ( scrollLeft )
+                            ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
+                        else
+                            isScrolling = false;
+                    }
+
+                    if ( (scrollLeft && movingRight) || (scrollRight && movingLeft) )
+                    {
+                        isScrolling = false;
+                    }
+
+                    chara.MoveCharacter( isScrolling: isScrolling );
                 }
             }
 
-            if (playerBox.getCenter().X > 500){
+
+            if (playerBox.getCenter().X > 500)
+            {
                 if (!LoadedChunks.Contains(1)) { LoadedChunks.Add(1); };
             }
             else { LoadedChunks.Remove(1); }
+
 
                 label5.Text = (playerBox.CollisionState[0]).ToString();
             label4.Text = (playerBox.CollisionState[1]).ToString();
             label1.Text = (playerBox.getCenter()).ToString();
             label2.Text = (box2.getCenter()).ToString();
-            label3.Text = Convert.ToString(playerBox.xStickTarget);
+            label3.Text = (onWorldBoundary).ToString();
             GC.Collect();
             this.Refresh();
         }
+
+
+
+
+
+        public void ScrollPlatform(int currentLevel, double velocity)
+        {
+            for (int i = 0; i < AllChunks; i++)
+            {
+                foreach (Platform plat in Platform.PlatformList[currentLevel][i])
+                {
+                    plat.updateLocation(plat.getPoint().X + (int)velocity, plat.getPoint().Y);
+                }
+            }
+        }
+
+
+
+
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
@@ -116,6 +187,10 @@ namespace platformingPrototype
                 }
             }
         }
+
+
+
+
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
@@ -135,6 +210,10 @@ namespace platformingPrototype
                 jumping = true;
             }
         }
+
+
+
+
 
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
