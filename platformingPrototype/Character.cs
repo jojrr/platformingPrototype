@@ -24,8 +24,10 @@ namespace platformingPrototype
         private int CoyoteTime;
         private const double Gravity = 0.981;
 
-        public Rectangle xStickTarget;
-        public Rectangle yStickTarget;
+        public Rectangle? xStickTarget;
+        public Rectangle? yStickTarget;
+        private Entity? xStickEntity;
+        private Entity? yStickEntity;
 
         private Rectangle OverShootRec;
         
@@ -91,14 +93,16 @@ namespace platformingPrototype
             // sets collision to null if not longer colliding with the previously colliding hitbox
             if (!Hitbox.IntersectsWith(targetHitbox))
             {
-                if (targetHitbox == xStickTarget)
+                if (collisionTarget == xStickEntity)
                 {
-                    xStickTarget = Hitbox;
+                    xStickTarget = null;
+                    xStickEntity = null;
                     CollisionState[xCollider] = "null"; 
                 }
-                if (targetHitbox == yStickTarget)
+                if (collisionTarget == yStickEntity)
                 {
-                    yStickTarget = Hitbox;
+                    yStickTarget = null;
+                    yStickEntity = null;
                     CollisionState[yCollider] = "null";
                 }
             }
@@ -113,12 +117,14 @@ namespace platformingPrototype
                         if (!IsOnFloor) { yVelocity = 0; } // zeros the velocity if the player was previously not on the floor when landing (prevents fling)
                         CollisionState[yCollider] = "bottom";
                         yStickTarget = targetHitbox;
+                        yStickEntity = collisionTarget;
                     }
                     // Checks if there is a platform above the player
-                    else if (Center.Y >= targetCenter.Y + targetHitbox.Height/2 - Height/4 )
+                    else if ((Center.Y >= targetCenter.Y + targetHitbox.Height/2 - Height/4 ) && (yVelocity <0))
                     {
                         CollisionState[yCollider] = "top";
                         yStickTarget = targetHitbox;
+                        yStickEntity = collisionTarget;
                     }
                 }
 
@@ -127,11 +133,13 @@ namespace platformingPrototype
                 {
                     CollisionState[xCollider] = "right";
                     xStickTarget = targetHitbox;
+                    xStickEntity = collisionTarget;
                 }
                 else if (Center.X > targetHitbox.Right)
                 {
                     CollisionState[xCollider] = "left";
                     xStickTarget = targetHitbox;
+                    xStickEntity = collisionTarget;
                 }
             }
             
@@ -143,34 +151,39 @@ namespace platformingPrototype
         {
             Rectangle targetHitbox =  IsCollidingWith(target);
 
-            // if platform is above -> set the location to 1 under the platform to prevent getting stuck
-            if ( CollisionState[yCollider] == "top")
+            if (yStickTarget != null)
             {
-                Location.Y = yStickTarget.Bottom + 1; 
-                yVelocity = 0;
+                // if platform is above -> set the location to 1 under the platform to prevent getting stuck
+                if ( CollisionState[yCollider] == "top")
+                {
+                    Location.Y = yStickTarget.Value.Bottom + 1; 
+                    yVelocity = 0;
+                }
+
+                // adds coyote time if there is a platform below the player, and sets the Y value of the player to the platform
+                else if ( CollisionState[yCollider] == "bottom" )
+                {
+                    CoyoteTime = 10; // 100ms (on 10ms timer)
+                    Location.Y = yStickTarget.Value.Y - Height;
+                }
+
+                // if the player is colliding with a corner, prevents the left/right wall collisions
+                if (xStickTarget == yStickTarget)
+                {
+                    return;
+                }
             }
 
-            // adds coyote time if there is a platform below the player, and sets the Y value of the player to the platform
-            else if ( CollisionState[yCollider] == "bottom" )
+            if (xStickTarget != null)
             {
-                CoyoteTime = 10; // 100ms (on 10ms timer)
-                Location.Y = yStickTarget.Y - Height;
-            }
-
-            // if the player is colliding with a corner, prevents the left/right wall collisions
-            if (xStickTarget == yStickTarget)
-            {
-                return;
-            }
-
-            // 
-            if (CollisionState[xCollider] == "right")
-            {
-                Location.X = xStickTarget.Left - this.Width;
-            }
-            else if (CollisionState[xCollider] == "left")
-            {
-                Location.X = xStickTarget.Right;
+                if (CollisionState[xCollider] == "right")
+                {
+                    Location.X = xStickTarget.Value.Left - this.Width;
+                }
+                else if (CollisionState[xCollider] == "left")
+                {
+                    Location.X = xStickTarget.Value.Right;
+                }
             }
 
 
@@ -203,6 +216,7 @@ namespace platformingPrototype
 
             if (isScrolling == true) 
             {
+                if (yStickEntity != null) { CheckPlatformCollision(yStickEntity); }
                 updateLocation(Location.X, Location.Y + (int)yVelocity);
             }
             else
@@ -216,7 +230,8 @@ namespace platformingPrototype
             // if not moving horizontally -> gradually decrease horizontal velocity
             if ((!IsMoving) && (Math.Abs(xVelocity) > 0.01)) 
             {
-                xVelocity *= 0.85;
+                //xVelocity *= 0.85;
+                xVelocity = 0;
             }
         }
 
