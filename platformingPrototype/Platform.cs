@@ -22,30 +22,9 @@ namespace platformingPrototype
                 }
             }
         }
-
-
-
         public Platform(Point origin, int width, int height, int LocatedLevel, int LocatedChunk) : base(origin, width, height)
         {
             PlatformList[LocatedLevel][LocatedChunk].Add(this);
         } 
-
-
-
-        public Point getPoint()
-        {
-            return (this.getLocation());
-        }
-
-
-
-        public int getChunksInLvl(int level)
-        {
-            return ChunksInLvl[level];
-        }
-
-
-
-
     }
 }
