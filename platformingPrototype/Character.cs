@@ -67,7 +67,8 @@ namespace platformingPrototype
         /// <param name="xVelocity">default = 0</param>
         /// <param name="yVelocity">default = 0</param>
         /// <param name="flying">default = false</param>
-        public Character(Point origin, int width, int height, int LocatedLevel, int LocatedChunk,  double xVelocity = 0, double yVelocity = 0, bool flying = false): base(origin: origin, width: width, height: height) 
+        public Character(Point origin, int width, int height, int LocatedLevel, int LocatedChunk,  double xVelocity = 0, double yVelocity = 0, bool flying = false)
+            : base(origin: origin, width: width, height: height) 
         {
             this.xVelocity = xVelocity;
             this.yVelocity = yVelocity;
