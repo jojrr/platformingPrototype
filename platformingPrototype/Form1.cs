@@ -101,9 +101,9 @@ namespace platformingPrototype
                     else if (viewPort.Right > box2.getHitbox().Right) { onWorldBoundary = "right"; }
                     else { onWorldBoundary = "null"; }
 
-                    if ((playerBox.getCenter().X < 500) && (movingLeft))
+                    if ((playerBox.getCenter().X < 500) && (playerBox.xVelocity < 0))
                     { scrollLeft = true; }
-                    else if ((playerBox.getCenter().X > 1300) && (movingRight))
+                    else if ((playerBox.getCenter().X > 1300) && (playerBox.xVelocity > 0))
                     { scrollRight = true; }
                     else
                     {

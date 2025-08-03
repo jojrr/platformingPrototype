@@ -42,8 +42,10 @@ namespace platformingPrototype
         // Initalises the jagged array - adds this character to [level][chunk]
         static Character()
         {
-            // Loops through all levels and looks at the number of chunks of each level stored in the array
-            // [ChunksInLvl] at each according level and initalises the jagged array [CharacterList] accordingly
+            /*
+            Loops through all levels and looks at the number of chunks of each level stored in the array
+            [ChunksInLvl] at each according level and initalises the jagged array [CharacterList] accordingly
+            */ 
             for (int level = 0; level < TotalLevels; level++) {
                 int chunks = ChunksInLvl[level];
                 CharacterList[level] = new List<Character>[chunks];
@@ -236,8 +238,7 @@ namespace platformingPrototype
             // if not moving horizontally -> gradually decrease horizontal velocity
             if ((!IsMoving) && (Math.Abs(xVelocity) > 0.01)) 
             {
-                //xVelocity *= 0.85;
-                xVelocity = 0;
+                xVelocity *= 0.85;
             }
         }
 
