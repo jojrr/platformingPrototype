@@ -154,7 +154,7 @@ namespace platformingPrototype
             if (yStickTarget != null)
             {
                 // if platform is above -> set the location to 1 under the platform to prevent getting stuck
-                if ( CollisionState[yCollider] == "top")
+                if ( CollisionState[yCollider] == "top" )
                 {
                     Location.Y = yStickTarget.Value.Bottom + 1; 
                     yVelocity = 0;
@@ -178,11 +178,11 @@ namespace platformingPrototype
             {
                 if (CollisionState[xCollider] == "right")
                 {
-                    Location.X = xStickTarget.Value.Left - this.Width;
+                    Location.X = xStickTarget.Value.Left - this.Width + 1;
                 }
                 else if (CollisionState[xCollider] == "left")
                 {
-                    Location.X = xStickTarget.Value.Right;
+                    Location.X = xStickTarget.Value.Right - 1;
                 }
             }
 
@@ -197,6 +197,10 @@ namespace platformingPrototype
         {
             if (HasGravity)
             {
+                // stops the player going above the screen
+                if (Location.Y < 0 )
+                    yVelocity = 5;
+
                 // if there is no floor beneath -> gravity occurs
                 if ( CollisionState[0] != "bottom" )
                 {
@@ -206,6 +210,7 @@ namespace platformingPrototype
                     // Terminal velocity -> only applies downwards
                     if (yVelocity > 0) { yVelocity = Math.Min(yVelocity, TerminalVelocity); }
                 }
+
                 // Coyote time ticks down 
                 if (CoyoteTime > 0) 
                 {

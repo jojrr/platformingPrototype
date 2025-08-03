@@ -74,7 +74,7 @@ namespace platformingPrototype
             if (movingLeft) { playerBox.xVelocity -= xAccel; }
             if (movingRight) { playerBox.xVelocity += xAccel; }
 
-            if (!movingLeft && !movingRight)
+            if ((!movingLeft && !movingRight) || (playerBox.CollisionState[1] != "null"))
             {
                 playerBox.IsMoving = false;
             }
@@ -94,38 +94,31 @@ namespace platformingPrototype
                     else if (viewPort.Right > box2.getHitbox().Right) { onWorldBoundary = "right"; }
                     else { onWorldBoundary = "null"; }
 
-                    if (playerBox.getCenter().X < 500) { scrollLeft = true; }
-                    if (playerBox.getCenter().X > 1300) { scrollRight = true; }
-
-                    bool isScrolling = (scrollLeft || scrollRight);
-
-                    if ((scrollLeft && movingRight) || (scrollRight && movingLeft))
+                    if ((playerBox.getCenter().X < 500) && (movingLeft))
+                    { scrollLeft = true; }
+                    else if ((playerBox.getCenter().X > 1300) && (movingRight))
+                    { scrollRight = true; }
+                    else
                     {
-                        isScrolling = false;
+                        scrollLeft = false;
+                        scrollRight = false;
                     }
 
-                    if (onWorldBoundary == "null")
+
+                    if (onWorldBoundary == "left")
                     {
-                        if (scrollRight && movingRight) { ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity); isScrolling = true; }
-                        else if (scrollLeft && movingLeft) { ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity); isScrolling = true; }
-                        else
-                            isScrolling = false;
-                    }
-                    else if (onWorldBoundary == "left")
-                    {
-                        if (scrollRight && movingRight)
-                            ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
-                        else
-                            isScrolling = false;
+                        scrollLeft = false;
                     }
 
                     else if (onWorldBoundary == "right")
                     {
-                        if (scrollLeft && movingLeft)
-                            ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
-                        else
-                            isScrolling = false;
+                        scrollRight = false;
                     }
+
+                    if (scrollRight) 
+                        ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
+                    else if (scrollLeft) 
+                        ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
 
                     foreach (int chunk2 in LoadedChunks)
                     {
@@ -134,6 +127,8 @@ namespace platformingPrototype
                             chara.CheckPlatformCollision(plat);
                         }
                     }
+
+                    bool isScrolling = (scrollRight || scrollLeft);
 
                     chara.MoveCharacter(isScrolling: isScrolling);
                 }
@@ -163,6 +158,8 @@ namespace platformingPrototype
 
         public void ScrollPlatform(int currentLevel, double velocity)
         {
+            if ((playerBox.CollisionState[1] == "left") && (playerBox.xVelocity < 0)) { velocity = 0; }
+            if ((playerBox.CollisionState[1] == "right") && (playerBox.xVelocity > 0)) { velocity= 0; }
             for (int i = 0; i < AllChunks; i++)
             {
                 foreach (Platform plat in Platform.PlatformList[currentLevel][i])
@@ -212,7 +209,7 @@ namespace platformingPrototype
             }
             if (e.KeyCode == Keys.W)
             {
-                jumping = true;
+                if (playerBox.IsOnFloor) { jumping = true; }
             }
         }
 
@@ -232,7 +229,11 @@ namespace platformingPrototype
             }
             if (e.KeyCode == Keys.W)
             {
-                jumping = false;
+                if (jumping)
+                {
+                    jumping = false;
+                    if (playerBox.yVelocity < 0) { playerBox.yVelocity = 1; }
+                }
             }
         }
     }
