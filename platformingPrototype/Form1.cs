@@ -5,34 +5,43 @@ namespace platformingPrototype
 {
     public partial class Form1 : Form
     {
-        Character playerBox = new(
-            origin: new Point(750, 250),
-            width: 50,
-            height: 50,
-            LocatedLevel: 0,
-            LocatedChunk: 0,
-            yVelocity: -0.2);
 
-         Platform box2 = new(
-            origin: new Point(1, 650),
-            width: 5400,
-            height: 550,
-            LocatedLevel: 0,
-            LocatedChunk: 0);
+    Character playerBox = new(
+        origin: new Point(750, 250),
+        width: 50,
+        height: 50,
+        LocatedLevel: 0,
+        LocatedChunk: 0,
+        yVelocity: -0.2);
 
-         Platform box3 = new(
-            origin: new Point(300, 200),
-            width: 400,
-            height: 175,
-            LocatedLevel: 0,
-            LocatedChunk: 0);
+    Platform box2 = new(
+       origin: new Point(1, 650),
+       width: 5400,
+       height: 550,
+       LocatedLevel: 0,
+       LocatedChunk: 0);
 
-         Platform box4 = new(
-            origin: new Point(1000, 400),
-            width: 200,
-            height: 300,
-            LocatedLevel: 0,
-            LocatedChunk: 0);
+    Platform box3 = new(
+       origin: new Point(300, 200),
+       width: 400,
+       height: 175,
+       LocatedLevel: 0,
+       LocatedChunk: 0);
+
+    Platform box4 = new(
+       origin: new Point(1000, 400),
+       width: 200,
+       height: 300,
+       LocatedLevel: 0,
+       LocatedChunk: 0);
+
+    Entity chunkLoader1 = new Entity(
+        origin: new Point(2000, 0),
+        width: 1,
+        height: 2000);
+            
+
+             
 
 
         Rectangle viewPort;
@@ -115,9 +124,9 @@ namespace platformingPrototype
                         scrollRight = false;
                     }
 
-                    if (scrollRight) 
-                        ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
-                    else if (scrollLeft) 
+                    bool isScrolling = (scrollRight || scrollLeft);
+
+                    if (isScrolling) 
                         ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
 
                     foreach (int chunk2 in LoadedChunks)
@@ -128,7 +137,6 @@ namespace platformingPrototype
                         }
                     }
 
-                    bool isScrolling = (scrollRight || scrollLeft);
 
                     chara.MoveCharacter(isScrolling: isScrolling);
                 }
