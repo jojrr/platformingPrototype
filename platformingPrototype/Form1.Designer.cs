@@ -55,12 +55,11 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(1184, 66);
+            label2.Location = new Point(111, 66);
             label2.Name = "label2";
             label2.Size = new Size(63, 24);
             label2.TabIndex = 1;
             label2.Text = "label2";
-            label2.Visible = false;
             // 
             // label3
             // 

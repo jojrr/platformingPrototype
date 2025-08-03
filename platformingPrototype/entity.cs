@@ -22,7 +22,7 @@ namespace platformingPrototype
         protected Rectangle Hitbox;
 
         protected const int TotalLevels = 1;
-        protected static readonly int[] ChunksInLvl = new int[TotalLevels] { 2 };
+        protected static readonly int[] ChunksInLvl = new int[TotalLevels] { 3 };
 
         /// <summary>
         /// returns the hitbox as a rectangle

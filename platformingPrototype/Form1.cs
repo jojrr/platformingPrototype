@@ -6,44 +6,42 @@ namespace platformingPrototype
     public partial class Form1 : Form
     {
 
-    Character playerBox = new(
-        origin: new Point(750, 250),
-        width: 50,
-        height: 50,
-        LocatedLevel: 0,
-        LocatedChunk: 0,
-        yVelocity: -0.2);
+        Character playerBox = new(
+            origin: new Point(750, 250),
+            width: 50,
+            height: 50,
+            LocatedLevel: 0,
+            LocatedChunk: 0,
+            yVelocity: -0.2);
 
-    Platform box2 = new(
-       origin: new Point(1, 650),
-       width: 5400,
-       height: 550,
-       LocatedLevel: 0,
-       LocatedChunk: 0);
+        Platform box2 = new(
+           origin: new Point(1, 650),
+           width: 5400,
+           height: 550,
+           LocatedLevel: 0,
+           LocatedChunk: 0);
 
-    Platform box3 = new(
-       origin: new Point(300, 200),
-       width: 400,
-       height: 175,
-       LocatedLevel: 0,
-       LocatedChunk: 0);
+        Platform box3 = new(
+           origin: new Point(300, 200),
+           width: 400,
+           height: 175,
+           LocatedLevel: 0,
+           LocatedChunk: 1);
 
-    Platform box4 = new(
-       origin: new Point(1000, 400),
-       width: 200,
-       height: 300,
-       LocatedLevel: 0,
-       LocatedChunk: 0);
+        Platform box4 = new(
+           origin: new Point(1000, 400),
+           width: 200,
+           height: 300,
+           LocatedLevel: 0,
+           LocatedChunk: 1);
 
-    Entity chunkLoader1 = new Entity(
-        origin: new Point(2000, 0),
-        width: 1,
-        height: 2000);
+        Entity chunkLoader1 = new Entity(
+            origin: new Point(2000, 0),
+            width: 1,
+            height: 2000);
             
 
              
-
-
         Rectangle viewPort;
         string onWorldBoundary = "left";
 
@@ -70,7 +68,7 @@ namespace platformingPrototype
         private void Form1_Load(object sender, EventArgs e)
         {
             CurrentLevel = 0;
-            LoadedChunks = [0];
+            LoadedChunks = [0,1];
             AllChunks = box2.getChunksInLvl(CurrentLevel); 
             int windowWidth = this.Width;
             int windowHeight = this.Height;
@@ -142,11 +140,33 @@ namespace platformingPrototype
                 }
             }
 
+            if (playerBox.getCenter().X > chunkLoader1.getCenter().X)
+            {
+                if (!LoadedChunks.Contains(2))
+                {
+                    LoadedChunks.Remove(1);
+                    LoadedChunks.Add(2);
+                }
+            }
+            else
+                if (!LoadedChunks.Contains(1))
+                {
+                    LoadedChunks.Remove(2);
+                    LoadedChunks.Add(1);
+                }
+
 
             label5.Text = (playerBox.CollisionState[0]).ToString();
             label4.Text = (playerBox.CollisionState[1]).ToString();
+
+            string chunkStrings = "";
+            foreach (int chunk in LoadedChunks)
+            {
+                chunkStrings = chunkStrings + ($"{chunk}, ");
+            }
+            label2.Text = (chunkStrings).ToString();
+
             label1.Text = (playerBox.getCenter()).ToString();
-            label2.Text = (box2.getCenter()).ToString();
             label3.Text = (onWorldBoundary).ToString();
             GC.Collect();
             this.Refresh();
@@ -167,6 +187,7 @@ namespace platformingPrototype
                     plat.updateLocation(plat.getPoint().X + (int)velocity, plat.getPoint().Y);
                 }
             }
+            chunkLoader1.updateLocation(chunkLoader1.getLocation().X + (int)velocity, chunkLoader1.getLocation().Y);
         }
 
 
