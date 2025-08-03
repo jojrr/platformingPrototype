@@ -136,13 +136,6 @@ namespace platformingPrototype
             }
 
 
-            if (playerBox.getCenter().X > 500)
-            {
-                if (!LoadedChunks.Contains(1)) { LoadedChunks.Add(1); };
-            }
-            else { LoadedChunks.Remove(1); }
-
-
                 label5.Text = (playerBox.CollisionState[0]).ToString();
             label4.Text = (playerBox.CollisionState[1]).ToString();
             label1.Text = (playerBox.getCenter()).ToString();
