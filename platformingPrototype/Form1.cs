@@ -74,7 +74,7 @@ namespace platformingPrototype
             if (movingLeft) { playerBox.xVelocity -= xAccel; }
             if (movingRight) { playerBox.xVelocity += xAccel; }
 
-            if (!movingLeft  && !movingRight)
+            if ((!movingLeft && !movingRight) || (playerBox.CollisionState[1] != "null"))
             {
                 playerBox.IsMoving = false;
             }
@@ -84,10 +84,42 @@ namespace platformingPrototype
             }
 
 
+
             foreach (int chunk1 in LoadedChunks)
             {
                 foreach (Character chara in Character.CharacterList[CurrentLevel][chunk1])
                 {
+
+                    if (viewPort.Left < box2.getHitbox().Left) { onWorldBoundary = "left"; }
+                    else if (viewPort.Right > box2.getHitbox().Right) { onWorldBoundary = "right"; }
+                    else { onWorldBoundary = "null"; }
+
+                    if ((playerBox.getCenter().X < 500) && (movingLeft))
+                    { scrollLeft = true; }
+                    else if ((playerBox.getCenter().X > 1300) && (movingRight))
+                    { scrollRight = true; }
+                    else
+                    {
+                        scrollLeft = false;
+                        scrollRight = false;
+                    }
+
+
+                    if (onWorldBoundary == "left")
+                    {
+                        scrollLeft = false;
+                    }
+
+                    else if (onWorldBoundary == "right")
+                    {
+                        scrollRight = false;
+                    }
+
+                    if (scrollRight) 
+                        ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
+                    else if (scrollLeft) 
+                        ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
+
                     foreach (int chunk2 in LoadedChunks)
                     {
                         foreach (Platform plat in Platform.PlatformList[CurrentLevel][chunk2])
@@ -96,54 +128,14 @@ namespace platformingPrototype
                         }
                     }
 
-                    if (viewPort.Left < box2.getHitbox().Left) { onWorldBoundary = "left"; } 
-                    else if (viewPort.Right > box2.getHitbox().Right) { onWorldBoundary = "right"; } 
-                    else { onWorldBoundary = "null"; }
+                    bool isScrolling = (scrollRight || scrollLeft);
 
-                    if (playerBox.getCenter().X < 300) { scrollLeft = true; }
-                    if (playerBox.getCenter().X > 1300) { scrollRight = true; }
-
-                    bool isScrolling = (scrollLeft || scrollRight);
-
-                    if (onWorldBoundary == "null" )
-                    {
-                        if ( isScrolling )
-                            ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
-                    }
-                    else if (onWorldBoundary == "left")
-                    {
-                        if ( scrollRight )
-                            ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
-                        else
-                            isScrolling = false;
-                    }
-
-                    else if (onWorldBoundary == "right")
-                    {
-                        if ( scrollLeft )
-                            ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
-                        else
-                            isScrolling = false;
-                    }
-
-                    if ( (scrollLeft && movingRight) || (scrollRight && movingLeft) )
-                    {
-                        isScrolling = false;
-                    }
-
-                    chara.MoveCharacter( isScrolling: isScrolling );
+                    chara.MoveCharacter(isScrolling: isScrolling);
                 }
             }
 
 
-            if (playerBox.getCenter().X > 500)
-            {
-                if (!LoadedChunks.Contains(1)) { LoadedChunks.Add(1); };
-            }
-            else { LoadedChunks.Remove(1); }
-
-
-                label5.Text = (playerBox.CollisionState[0]).ToString();
+            label5.Text = (playerBox.CollisionState[0]).ToString();
             label4.Text = (playerBox.CollisionState[1]).ToString();
             label1.Text = (playerBox.getCenter()).ToString();
             label2.Text = (box2.getCenter()).ToString();
@@ -158,6 +150,8 @@ namespace platformingPrototype
 
         public void ScrollPlatform(int currentLevel, double velocity)
         {
+            if ((playerBox.CollisionState[1] == "left") && (playerBox.xVelocity < 0)) { velocity = 0; }
+            if ((playerBox.CollisionState[1] == "right") && (playerBox.xVelocity > 0)) { velocity= 0; }
             for (int i = 0; i < AllChunks; i++)
             {
                 foreach (Platform plat in Platform.PlatformList[currentLevel][i])
@@ -207,7 +201,7 @@ namespace platformingPrototype
             }
             if (e.KeyCode == Keys.W)
             {
-                jumping = true;
+                if (playerBox.IsOnFloor) { jumping = true; }
             }
         }
 
@@ -227,7 +221,11 @@ namespace platformingPrototype
             }
             if (e.KeyCode == Keys.W)
             {
-                jumping = false;
+                if (jumping)
+                {
+                    jumping = false;
+                    if (playerBox.yVelocity < 0) { playerBox.yVelocity = 1; }
+                }
             }
         }
     }
