@@ -97,34 +97,38 @@ namespace platformingPrototype
                 foreach (Character chara in Character.CharacterList[CurrentLevel][chunk1])
                 {
 
-                    if (viewPort.Left < box2.getHitbox().Left) { onWorldBoundary = "left"; }
-                    else if (viewPort.Right > box2.getHitbox().Right) { onWorldBoundary = "right"; }
-                    else { onWorldBoundary = "null"; }
-
-                    if ((playerBox.getCenter().X < 500) && (playerBox.xVelocity < 0))
-                    { scrollLeft = true; }
-                    else if ((playerBox.getCenter().X > 1300) && (playerBox.xVelocity > 0))
-                    { scrollRight = true; }
-                    else
+                    if (Math.Abs(chara.xVelocity) > 0)
                     {
-                        scrollLeft = false;
-                        scrollRight = false;
-                    }
+                        if (viewPort.Left < box2.getHitbox().Left) { onWorldBoundary = "left"; }
+                        else if (viewPort.Right > box2.getHitbox().Right) { onWorldBoundary = "right"; }
+                        else { onWorldBoundary = "null"; }
+
+                        if ((playerBox.getCenter().X < 500) && (playerBox.xVelocity < 0))
+                        { scrollLeft = true; }
+                        else if ((playerBox.getCenter().X > 1300) && (playerBox.xVelocity > 0))
+                        { scrollRight = true; }
+                        else
+                        {
+                            scrollLeft = false;
+                            scrollRight = false;
+                        }
 
 
-                    if (onWorldBoundary == "left")
-                    {
-                        scrollLeft = false;
-                    }
+                        if (onWorldBoundary == "left")
+                        {
+                            scrollLeft = false;
+                        }
 
-                    else if (onWorldBoundary == "right")
-                    {
-                        scrollRight = false;
+                        else if (onWorldBoundary == "right")
+                        {
+                            scrollRight = false;
+                        }
+
                     }
 
                     bool isScrolling = (scrollRight || scrollLeft);
 
-                    if (isScrolling) 
+                    if (isScrolling)
                         ScrollPlatform(currentLevel: CurrentLevel, velocity: -chara.xVelocity);
 
                     foreach (int chunk2 in LoadedChunks)
@@ -142,32 +146,30 @@ namespace platformingPrototype
 
             if (playerBox.getCenter().X > chunkLoader1.getCenter().X)
             {
-                if (!LoadedChunks.Contains(2))
+                if (LoadedChunks.Contains(1))
                 {
                     LoadedChunks.Remove(1);
-                    LoadedChunks.Add(2);
                 }
             }
             else
                 if (!LoadedChunks.Contains(1))
                 {
-                    LoadedChunks.Remove(2);
                     LoadedChunks.Add(1);
                 }
 
 
-            label5.Text = (playerBox.CollisionState[0]).ToString();
-            label4.Text = (playerBox.CollisionState[1]).ToString();
+            //label5.Text = (playerBox.CollisionState[0]).ToString();
+            //label4.Text = (playerBox.CollisionState[1]).ToString();
 
-            string chunkStrings = "";
-            foreach (int chunk in LoadedChunks)
-            {
-                chunkStrings = chunkStrings + ($"{chunk}, ");
-            }
-            label2.Text = (chunkStrings).ToString();
+            //string chunkStrings = "";
+            //foreach (int chunk in LoadedChunks)
+            //{
+            //    chunkStrings = chunkStrings + ($"{chunk}, ");
+            //}
+            //label2.Text = (chunkStrings).ToString();
 
-            label1.Text = (playerBox.getCenter()).ToString();
-            label3.Text = (onWorldBoundary).ToString();
+            //label1.Text = (playerBox.getCenter()).ToString();
+            //label3.Text = (onWorldBoundary).ToString();
             GC.Collect();
             this.Refresh();
         }

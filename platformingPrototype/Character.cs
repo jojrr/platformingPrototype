@@ -26,7 +26,7 @@ namespace platformingPrototype
 
         public Rectangle? xStickTarget;
         public Rectangle? yStickTarget;
-        private Entity? xStickEntity;
+        private Entity? xStickEntity; // not used consider removal
         private Entity? yStickEntity;
 
         private Rectangle OverShootRec;
