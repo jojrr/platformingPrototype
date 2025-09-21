@@ -115,9 +115,10 @@ namespace platformingPrototype
                 if ((Center.X < targetHitbox.Right) && (Center.X > targetHitbox.Left))
                 {
                     // Checks if there is a platform below - considers overshoot
-                    if ( (Center.Y <= targetHitbox.Top  ) || (OverShootRec.IntersectsWith(targetHitbox) && (OverShootRec.Top < targetHitbox.Top)))
+                    if ( (Center.Y <= targetHitbox.Y  ) || (OverShootRec.IntersectsWith(targetHitbox) && (OverShootRec.Top < targetHitbox.Top)))
                     {
-                        //if (!IsOnFloor) { yVelocity = 0; } // zeros the velocity if the player was previously not on the floor when landing (prevents fling)
+                        // zeros the velocity if the player was previously not on the floor when landing (prevents fling)
+                        if (!IsOnFloor) { yVelocity = Math.Min(yVelocity, 0); } 
                         CollisionState[yCollider] = "bottom";
                         yStickTarget = targetHitbox;
                         yStickEntity = collisionTarget;
@@ -131,15 +132,9 @@ namespace platformingPrototype
                     }
                 }
 
-                if ((xStickEntity == yStickEntity) && IsOnFloor) // Stops the player from bugging on corners
+                if (Center.X < targetHitbox.Left) // Checks if there is a platform to the left/right of the player
                 {
-                    xStickTarget = null;
-                    xStickEntity = null;
-                    CollisionState[xCollider] = "null"; 
-                }
-                else if (Center.X < targetHitbox.Left) // Checks if there is a platform to the left/right of the player
-                {
-                    if (xStickEntity == null) { xVelocity = 0; }
+                    if ((xStickEntity == null) && (Center.Y > targetHitbox.Y)) { xVelocity = 0; }
 
                     CollisionState[xCollider] = "right";
                     xStickTarget = targetHitbox;
@@ -147,11 +142,17 @@ namespace platformingPrototype
                 }
                 else if (Center.X > targetHitbox.Right)
                 {
-                    if (xStickEntity == null) { xVelocity = 0; }
+                    if ((xStickEntity == null) && (Center.Y > targetHitbox.Y)) { xVelocity = 0; }
 
                     CollisionState[xCollider] = "left";
                     xStickTarget = targetHitbox;
                     xStickEntity = collisionTarget;
+                }
+
+                if ((xStickEntity == yStickEntity) && IsOnFloor) // Stops the player from bugging on corners
+                {
+                    xStickTarget = null;
+                    CollisionState[xCollider] = "null"; 
                 }
             }
             

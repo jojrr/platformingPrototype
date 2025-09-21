@@ -163,8 +163,9 @@ namespace platformingPrototype
                 }
 
 
-            //label5.Text = (playerBox.CollisionState[0]).ToString();
-            //label4.Text = (playerBox.CollisionState[1]).ToString();
+            label5.Text = playerBox.IsOnFloor.ToString();
+            label4.Text = (playerBox.CollisionState[1]).ToString();
+            label1.Text = (playerBox.CollisionState[0]).ToString();
 
             //string chunkStrings = "";
             //foreach (int chunk in LoadedChunks)
@@ -173,7 +174,6 @@ namespace platformingPrototype
             //}
             //label2.Text = (chunkStrings).ToString();
 
-            //label1.Text = (playerBox.getCenter()).ToString();
             //label3.Text = (onWorldBoundary).ToString();
             GC.Collect();
             this.Refresh();
