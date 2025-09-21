@@ -59,11 +59,14 @@ namespace platformingPrototype
         List<int> LoadedChunks;
         int AllChunks;
 
+        int timerTick = 144;
+
         public Form1()
         {
             InitializeComponent();
             this.DoubleBuffered = true;
         }
+
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -73,6 +76,8 @@ namespace platformingPrototype
             int windowWidth = this.Width;
             int windowHeight = this.Height;
             viewPort = new Rectangle( new Point(-5,0), new Size(windowWidth+10, windowHeight ) );
+
+            gameTick.Interval = 1000/timerTick;
         }
 
         private void timer1_Tick(object sender, EventArgs e)

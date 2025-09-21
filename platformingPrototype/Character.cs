@@ -26,7 +26,7 @@ namespace platformingPrototype
 
         public Rectangle? xStickTarget;
         public Rectangle? yStickTarget;
-        private Entity? xStickEntity; // not used consider removal
+        private Entity? xStickEntity; // HACK: not used consider removal
         private Entity? yStickEntity;
 
         private Rectangle OverShootRec;
@@ -117,7 +117,7 @@ namespace platformingPrototype
                     // Checks if there is a platform below - considers overshoot
                     if ( (Center.Y <= targetHitbox.Top  ) || (OverShootRec.IntersectsWith(targetHitbox) && (OverShootRec.Top < targetHitbox.Top)))
                     {
-                        if (!IsOnFloor) { yVelocity = 0; } // zeros the velocity if the player was previously not on the floor when landing (prevents fling)
+                        //if (!IsOnFloor) { yVelocity = 0; } // zeros the velocity if the player was previously not on the floor when landing (prevents fling)
                         CollisionState[yCollider] = "bottom";
                         yStickTarget = targetHitbox;
                         yStickEntity = collisionTarget;
@@ -131,15 +131,24 @@ namespace platformingPrototype
                     }
                 }
 
-                // Checks if there is a platform to the left/right of the player
-                if (Center.X < targetHitbox.Left)
+                if ((xStickEntity == yStickEntity) && IsOnFloor) // Stops the player from bugging on corners
                 {
+                    xStickTarget = null;
+                    xStickEntity = null;
+                    CollisionState[xCollider] = "null"; 
+                }
+                else if (Center.X < targetHitbox.Left) // Checks if there is a platform to the left/right of the player
+                {
+                    if (xStickEntity == null) { xVelocity = 0; }
+
                     CollisionState[xCollider] = "right";
                     xStickTarget = targetHitbox;
                     xStickEntity = collisionTarget;
                 }
                 else if (Center.X > targetHitbox.Right)
                 {
+                    if (xStickEntity == null) { xVelocity = 0; }
+
                     CollisionState[xCollider] = "left";
                     xStickTarget = targetHitbox;
                     xStickEntity = collisionTarget;
@@ -167,25 +176,23 @@ namespace platformingPrototype
                 else if ( CollisionState[yCollider] == "bottom" )
                 {
                     CoyoteTime = 10; // 100ms (on 10ms timer)
-                    Location.Y = yStickTarget.Value.Y - Height;
-                }
-
-                // if the player is colliding with a corner, prevents the left/right wall collisions
-                if (xStickTarget == yStickTarget)
-                {
-                    return;
+                    Location.Y = yStickTarget.Value.Y - Height + 1;
+                    yVelocity = Math.Min(yVelocity, 0);
                 }
             }
+
 
             if (xStickTarget != null)
             {
                 if (CollisionState[xCollider] == "right")
                 {
                     Location.X = xStickTarget.Value.Left - this.Width + 1;
+                    xVelocity = Math.Min(0, xVelocity);
                 }
                 else if (CollisionState[xCollider] == "left")
                 {
                     Location.X = xStickTarget.Value.Right - 1;
+                    xVelocity = Math.Max(0, xVelocity);
                 }
             }
 
@@ -205,7 +212,7 @@ namespace platformingPrototype
                     yVelocity = 5;
 
                 // if there is no floor beneath -> gravity occurs
-                if ( CollisionState[0] != "bottom" )
+                if ( CollisionState[yCollider] != "bottom" )
                 {
                     IsOnFloor = false;
                     yVelocity += Gravity; 
